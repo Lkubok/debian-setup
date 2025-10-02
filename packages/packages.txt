@@ -13,6 +13,7 @@ build-essential
 htop
 tree
 tmux
+mc
 screen
 rsync
 
