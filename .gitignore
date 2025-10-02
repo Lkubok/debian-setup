@@ -1,0 +1,18 @@
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+#other
+.claude/
+.history/
+
+# Config backups (may contain sensitive data)
+config-backup/backups/

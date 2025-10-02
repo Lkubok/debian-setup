@@ -1,0 +1,43 @@
+# Debian Package List
+# Lines starting with # are comments
+# One package per line
+
+# Development Tools
+git
+vim
+curl
+wget
+build-essential
+
+# System Utilities
+htop
+tree
+tmux
+screen
+rsync
+
+# Network Tools
+net-tools
+openssh-server
+openssh-client
+
+# Compression Tools
+zip
+unzip
+tar
+gzip
+
+# Text Processing
+jq
+sed
+awk
+grep
+
+# System Monitoring
+lsof
+strace
+dstat
+
+# Add your packages below:
+
+nodejs
