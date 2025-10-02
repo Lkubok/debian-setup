@@ -43,13 +43,13 @@ update_system() {
 install_package() {
     local package=$1
 
-    if dpkg -l | grep -q "^ii  $package "; then
+    if dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
         warn "Package '$package' is already installed"
         return 0
     fi
 
     log "Installing $package..."
-    if apt-get install -y "$package" >> "$LOG_FILE" 2>&1; then
+    if apt-get install -y "$package" 2>&1 | tee -a "$LOG_FILE"; then
         log "Successfully installed $package"
         return 0
     else
@@ -85,13 +85,15 @@ install_from_list() {
 
         package=$(echo "$line" | awk '{print $1}')
 
-        if install_package "$package"; then
-            if dpkg -l | grep -q "^ii  $package "; then
-                ((installed++))
-            else
-                ((skipped++))
-            fi
+        # Check if already installed before attempting
+        if dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
+            warn "Package '$package' is already installed"
+            ((skipped++))
+        elif apt-get install -y "$package" >> "$LOG_FILE" 2>&1; then
+            log "Successfully installed $package"
+            ((installed++))
         else
+            error "Failed to install $package"
             ((failed++))
         fi
     done < "$list_file"
