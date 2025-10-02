@@ -4,7 +4,8 @@ A comprehensive tool for managing Debian package installations and system config
 
 ## Features
 
-- ✅ Automated package installation from a configurable list
+- ✅ Automated APT package installation from a configurable list
+- ✅ NPM global package installation support
 - ✅ Detailed logging and error handling
 - ✅ Color-coded output for easy monitoring
 - ✅ Skip already installed packages
@@ -17,7 +18,8 @@ A comprehensive tool for managing Debian package installations and system config
 debian-setup/
 ├── install.sh                  # Main installation script
 ├── packages/
-│   └── packages.txt           # List of packages to install
+│   ├── packages.txt           # List of APT packages to install
+│   └── npm-packages.txt       # List of NPM packages to install
 ├── config-backup/             # Config backup scripts (future)
 ├── scripts/                   # Additional utility scripts
 └── README.md                  # This file
@@ -31,25 +33,32 @@ debian-setup/
 sudo ./install.sh
 ```
 
-### 2. Customize Package List
+### 2. Customize Package Lists
 
-Edit [packages/packages.txt](packages/packages.txt) to add or remove packages:
+Edit package lists to add or remove packages:
 
 ```bash
-vim packages/packages.txt
+vim packages/packages.txt      # APT packages
+vim packages/npm-packages.txt  # NPM packages
 ```
 
 ### 3. Run with Options
 
 ```bash
+# Install both APT and NPM packages
+sudo ./install.sh
+
 # Install packages and upgrade system
 sudo ./install.sh --upgrade --cleanup
 
-# Use custom package list
-sudo ./install.sh --list custom-packages.txt
+# Install only NPM packages
+sudo ./install.sh --npm-only
 
-# Skip system update
-sudo ./install.sh --no-update
+# Skip NPM packages
+sudo ./install.sh --skip-npm
+
+# Use custom package lists
+sudo ./install.sh --list custom-packages.txt --npm-list custom-npm.txt
 ```
 
 ## Usage
@@ -60,22 +69,25 @@ sudo ./install.sh --no-update
 Usage: ./install.sh [OPTIONS]
 
 OPTIONS:
-    -h, --help          Show help message
-    -l, --list FILE     Specify custom package list file
-    -u, --upgrade       Upgrade system after installing packages
-    -c, --cleanup       Run cleanup after installation
-    --no-update         Skip system update before installation
+    -h, --help              Show help message
+    -l, --list FILE         Specify custom APT package list file
+    -n, --npm-list FILE     Specify custom NPM package list file
+    -u, --upgrade           Upgrade system after installing packages
+    -c, --cleanup           Run cleanup after installation
+    --no-update             Skip system update before installation
+    --skip-npm              Skip npm package installation
+    --npm-only              Only install npm packages (skip apt packages)
 ```
 
 ### Package List Format
 
-The [packages/packages.txt](packages/packages.txt) file uses a simple format:
+Both [packages/packages.txt](packages/packages.txt) and [packages/npm-packages.txt](packages/npm-packages.txt) use a simple format:
 
 - One package per line
 - Lines starting with `#` are comments
 - Empty lines are ignored
 
-Example:
+**APT Packages Example:**
 
 ```
 # Development Tools
@@ -88,16 +100,30 @@ htop
 tmux
 ```
 
+**NPM Packages Example:**
+
+```
+# AI Tools
+@anthropic-ai/claude-code
+
+# Development Tools
+typescript
+eslint
+```
+
 ## Features in Detail
 
 ### Automatic Package Installation
 
 The script will:
-1. Update package lists (unless `--no-update` is specified)
-2. Check if each package is already installed
-3. Install missing packages
-4. Log all operations to `install.log`
-5. Provide a summary of installed, skipped, and failed packages
+1. Update APT package lists (unless `--no-update` is specified)
+2. Check if each APT package is already installed
+3. Install missing APT packages
+4. Check if npm is available and install NPM packages (unless `--skip-npm` is specified)
+5. Check if each NPM package is already installed globally
+6. Install missing NPM packages
+7. Log all operations to `install.log`
+8. Provide a summary of installed, skipped, and failed packages
 
 ### Error Handling
 
@@ -116,7 +142,7 @@ All operations are logged to `install.log` with timestamps and status:
 
 ## Examples
 
-### Basic Installation
+### Basic Installation (APT + NPM)
 
 ```bash
 sudo ./install.sh
@@ -128,10 +154,22 @@ sudo ./install.sh
 sudo ./install.sh --upgrade --cleanup
 ```
 
-### Custom Package List
+### NPM Packages Only
 
 ```bash
-sudo ./install.sh --list server-packages.txt
+sudo ./install.sh --npm-only
+```
+
+### Skip NPM Packages
+
+```bash
+sudo ./install.sh --skip-npm
+```
+
+### Custom Package Lists
+
+```bash
+sudo ./install.sh --list server-packages.txt --npm-list dev-tools.txt
 ```
 
 ## Future Features

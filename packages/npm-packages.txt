@@ -1,0 +1,8 @@
+# NPM Global Packages List
+# Lines starting with # are comments
+# One package per line
+
+# AI Tools
+@anthropic-ai/claude-code
+
+# Add your npm packages below:
