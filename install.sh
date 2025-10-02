@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -34,27 +32,9 @@ check_root() {
 
 update_system() {
     log "Updating package lists..."
-    apt-get update || {
+    if ! apt-get update; then
         error "Failed to update package lists"
         exit 1
-    }
-}
-
-install_package() {
-    local package=$1
-
-    if dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
-        warn "Package '$package' is already installed"
-        return 0
-    fi
-
-    log "Installing $package..."
-    if apt-get install -y "$package" 2>&1 | tee -a "$LOG_FILE"; then
-        log "Successfully installed $package"
-        return 0
-    else
-        error "Failed to install $package"
-        return 1
     fi
 }
 
@@ -84,18 +64,25 @@ install_from_list() {
         [[ -z "$line" ]] && continue
 
         package=$(echo "$line" | awk '{print $1}')
+        [[ -z "$package" ]] && continue
 
-        # Check if already installed before attempting
+        # Check if already installed
         if dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
             warn "Package '$package' is already installed"
             ((skipped++))
-        elif apt-get install -y "$package" >> "$LOG_FILE" 2>&1; then
-            log "Successfully installed $package"
+            continue
+        fi
+
+        # Install package
+        log "Installing $package..."
+        if DEBIAN_FRONTEND=noninteractive apt-get install -y "$package" >> "$LOG_FILE" 2>&1; then
+            log "✓ Successfully installed $package"
             ((installed++))
         else
-            error "Failed to install $package"
+            error "✗ Failed to install $package"
             ((failed++))
         fi
+
     done < "$list_file"
 
     echo ""
