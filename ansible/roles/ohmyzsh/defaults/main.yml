@@ -1,0 +1,27 @@
+---
+# Default variables for Oh My Zsh role
+
+# Users to configure Oh My Zsh for
+ohmyzsh_users:
+  - root
+  - lukasz
+
+# Oh My Zsh repository
+ohmyzsh_repo: https://github.com/ohmyzsh/ohmyzsh.git
+
+# Powerlevel10k theme repository
+p10k_repo: https://github.com/romkatv/powerlevel10k.git
+
+# Oh My Zsh plugins to install
+ohmyzsh_plugins:
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+  - name: you-should-use
+    repo: https://github.com/MichaelAquilina/zsh-you-should-use.git
+  - name: zsh-bat
+    repo: https://github.com/fdellwing/zsh-bat.git
+
+# Set zsh as default shell
+set_default_shell: true

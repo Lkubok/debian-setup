@@ -1,0 +1,75 @@
+---
+- name: Get home directory for {{ username }}
+  shell: "getent passwd {{ username }} | cut -d: -f6"
+  register: user_home
+  changed_when: false
+
+- name: Set home directory fact
+  set_fact:
+    home_dir: "{{ user_home.stdout }}"
+
+- name: Check if Oh My Zsh is already installed for {{ username }}
+  stat:
+    path: "{{ home_dir }}/.oh-my-zsh"
+  register: ohmyzsh_stat
+
+- name: Install Oh My Zsh for {{ username }}
+  git:
+    repo: "{{ ohmyzsh_repo }}"
+    dest: "{{ home_dir }}/.oh-my-zsh"
+    depth: 1
+  become: yes
+  become_user: "{{ username }}"
+  when: not ohmyzsh_stat.stat.exists
+
+- name: Install Powerlevel10k theme for {{ username }}
+  git:
+    repo: "{{ p10k_repo }}"
+    dest: "{{ home_dir }}/.oh-my-zsh/custom/themes/powerlevel10k"
+    depth: 1
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Install Oh My Zsh plugins for {{ username }}
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ home_dir }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
+    depth: 1
+  loop: "{{ ohmyzsh_plugins }}"
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Deploy .zshrc for {{ username }}
+  template:
+    src: zshrc.j2
+    dest: "{{ home_dir }}/.zshrc"
+    owner: "{{ username }}"
+    mode: '0644'
+  become: yes
+
+- name: Check if p10k config exists for {{ username }}
+  stat:
+    path: "{{ home_dir }}/.p10k.zsh"
+  register: p10k_config
+
+- name: Generate default p10k config for {{ username }}
+  shell: |
+    echo '# Powerlevel10k configuration - run p10k configure to customize' > {{ home_dir }}/.p10k.zsh
+  become: yes
+  become_user: "{{ username }}"
+  when: not p10k_config.stat.exists
+
+- name: Set ownership of p10k config for {{ username }}
+  file:
+    path: "{{ home_dir }}/.p10k.zsh"
+    owner: "{{ username }}"
+    mode: '0644'
+  become: yes
+  when: not p10k_config.stat.exists
+
+- name: Set zsh as default shell for {{ username }}
+  user:
+    name: "{{ username }}"
+    shell: /bin/zsh
+  become: yes
+  when: set_default_shell | bool

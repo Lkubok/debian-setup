@@ -1,0 +1,21 @@
+---
+- name: Ensure zsh is installed
+  apt:
+    name: zsh
+    state: present
+  become: yes
+
+- name: Ensure required packages are installed
+  apt:
+    name:
+      - git
+      - curl
+      - wget
+    state: present
+  become: yes
+
+- name: Install Oh My Zsh for each user
+  include_tasks: install_user.yml
+  loop: "{{ ohmyzsh_users }}"
+  loop_control:
+    loop_var: username

@@ -1,0 +1,16 @@
+---
+- name: Setup Oh My Zsh for all users
+  hosts: kubok_dev
+  become: yes
+
+  roles:
+    - ohmyzsh
+
+  vars:
+    # Override users if needed
+    ohmyzsh_users:
+      - root
+      - khorzon
+
+    # Set to false if you don't want to change default shell
+    set_default_shell: true
