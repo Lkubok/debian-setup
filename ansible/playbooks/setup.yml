@@ -1,0 +1,165 @@
+---
+- name: Setup kubok.dev server with required packages
+  hosts: kubok_dev
+  become: yes
+
+  vars:
+    # Core System Packages
+    core_system:
+      - apparmor
+      - base-files
+      - base-passwd
+      - bash
+      - bash-completion
+      - bsdutils
+      - coreutils
+      - dash
+      - debconf
+      - debian-archive-keyring
+      - debianutils
+      - diffutils
+      - e2fsprogs
+      - findutils
+      - hostname
+      - passwd
+      - perl-base
+      - polkitd
+      - psmisc
+      - sudo
+      - sysvinit-utils
+      - systemd-resolved
+      - systemd-timesyncd
+      - whiptail
+
+    # Development Tools
+    development:
+      - build-essential
+      - git
+      - neovim
+      - vim
+      - default-jdk
+
+    # Shells & Terminal
+    shells:
+      - bash
+      - zsh
+
+    # CLI Utilities
+    cli_utilities:
+      - hstr
+      - htop
+      - less
+      - links
+      - mc
+      - mawk
+      - rsync
+      - screen
+      - tmux
+      - tree
+
+    # Network Tools
+    network:
+      - curl
+      - ethtool
+      - iputils-ping
+      - net-tools
+      - nmap
+      - openssh-client
+      - openssh-server
+      - socat
+      - ssh-import-id
+      - wget
+
+    # Security & Firewall
+    security:
+      - ca-certificates
+      - gnupg
+      - openssl
+      - openvpn
+      - ufw
+
+    # Web Servers & SSL
+    web:
+      - certbot
+      - nginx
+      - python3-certbot-nginx
+
+    # Containers & Orchestration
+    containers:
+      - docker-compose
+      - docker.io
+
+    # Databases
+    databases: []
+      # - mongodb-org  # Requires MongoDB official repository
+
+    # Programming Runtimes
+    runtimes:
+      - nodejs
+
+    # Compression Tools
+    compression:
+      - gzip
+      - tar
+      - unzip
+      - zip
+      - zlib1g
+      - zstd
+
+    # Text Processing
+    text_processing:
+      - gawk
+      - jq
+
+    # System Monitoring & Debugging
+    monitoring:
+      - dstat
+      - lsof
+      - pciutils
+      - strace
+
+    # Image Processing
+    media:
+      - graphicsmagick
+
+    # Package Management
+    package_management:
+      - apt-utils
+
+    # Terminal/Console
+    console:
+      - ncurses-base
+      - ncurses-bin
+
+    all_packages: "{{ core_system + development + shells + cli_utilities + network + security + web + containers + databases + runtimes + compression + text_processing + monitoring + media + package_management + console }}"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      when: upgrade_packages | default(false) | bool
+
+    - name: Install required packages
+      apt:
+        name: "{{ all_packages }}"
+        state: present
+
+    - name: Ensure SSH service is running
+      service:
+        name: ssh
+        state: started
+        enabled: yes
+
+    - name: Display installed package versions
+      shell: "dpkg -l | grep -E '{{ all_packages | join('|') }}' | awk '{print $2, $3}'"
+      register: package_versions
+      changed_when: false
+
+    - name: Show installed versions
+      debug:
+        msg: "{{ package_versions.stdout_lines }}"
